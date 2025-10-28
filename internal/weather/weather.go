@@ -43,6 +43,22 @@ type Result struct {
 var HttpClient = &http.Client{Timeout: 8 * time.Second}
 var BaseURL = "https://api.weatherapi.com/v1"
 
+func SetBaseURL(url string) {
+	if url == "" {
+		BaseURL = "https://api.weatherapi.com/v1"
+		return
+	}
+	BaseURL = url
+}
+
+func SetHTTPClient(client *http.Client) {
+	if client == nil {
+		HttpClient = &http.Client{Timeout: 8 * time.Second}
+		return
+	}
+	HttpClient = client
+}
+
 func apiKey() (string, error) {
 	k := os.Getenv("WEATHER_API_KEY")
 	if k == "" {
