@@ -219,7 +219,7 @@ internal/
 ├── weather.go
 └── weather_test.go
 rpc/
-└── chat.proto # definición del servicio Twirp/Protobuf
+└── chat.proto 
 docker-compose.yaml 
 go.mod 
 go.sum
