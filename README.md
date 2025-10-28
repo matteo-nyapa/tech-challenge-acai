@@ -183,48 +183,48 @@ Each Twirp request generates a **span** called `twirp.request` with attributes t
 
 ```bash
 cmd/
-├── cli/ # herramienta CLI para interactuar con la API
+├── cli/ 
 │ └── main.go
-└── server/ # punto de entrada principal del servidor
+└── server/
 └── main.go
 internal/
 ├── chat/
-│ ├── assistant/ # integración con OpenAI
-│ │ ├── assistant.go # núcleo del asistente
+│ ├── assistant/ 
+│ │ ├── assistant.go 
 │ │ ├── assistant_test.go
-│ │ ├── calendar/ # manejo de calendarios ICS (festivos)
-│ │ └── tools/ # tools modulares (weather, today, holidays, time_in)
-│ ├── model/ # modelos y acceso a base de datos MongoDB
+│ │ ├── calendar/ 
+│ │ └── tools/ 
+│ ├── model/ 
 │ │ ├── conversation.go
 │ │ ├── message.go
 │ │ ├── repository.go
 │ │ ├── role.go
-│ │ └── testing/ # utilidades para tests (fixtures, mocks)
+│ │ └── testing/ 
 │ │ ├── fixture.go
 │ │ ├── mongo.go
 │ │ └── server_test.go
-│ └── server.go # implementación principal del servidor Twirp
-├── httpx/ # middlewares de logging y recuperación de errores
+│ └── server.go 
+├── httpx/ 
 │ ├── logger.go
 │ └── recovery.go
-├── mongox/ # conexión a MongoDB
+├── mongox/ 
 │ └── connect.go
-├── observability/ # métricas y tracing con OpenTelemetry
+├── observability/ 
 │ ├── otel.go
 │ └── setup.go
-├── pb/ # código generado por Twirp/Protobuf (no modificar)
+├── pb/ 
 │ ├── chat.pb.go
 │ └── chat.twirp.go
-└── weather/ # cliente de WeatherAPI (actual y forecast)
+└── weather/ 
 ├── weather.go
 └── weather_test.go
 rpc/
 └── chat.proto # definición del servicio Twirp/Protobuf
-docker-compose.yaml # configuración para MongoDB local
-go.mod # dependencias del proyecto
+docker-compose.yaml 
+go.mod 
 go.sum
-Makefile # comandos make (up, run, test)
-README.md # documentación del proyecto
+Makefile 
+README.md 
 ```
 ---
 
