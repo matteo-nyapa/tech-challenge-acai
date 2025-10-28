@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/acai-travel/tech-challenge/internal/chat/model"
-	. "github.com/acai-travel/tech-challenge/internal/chat/testing"
-	"github.com/acai-travel/tech-challenge/internal/pb"
 	"github.com/google/go-cmp/cmp"
+	"github.com/matteo-nyapa/tech-challenge-acai/internal/chat/model"
+	. "github.com/matteo-nyapa/tech-challenge-acai/internal/chat/testing"
+	"github.com/matteo-nyapa/tech-challenge-acai/internal/pb"
 	"github.com/twitchtv/twirp"
 	"google.golang.org/protobuf/testing/protocmp"
 )

@@ -6,11 +6,12 @@ import (
 	"errors"
 	"log/slog"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
-	"github.com/acai-travel/tech-challenge/internal/chat/model"
 	ics "github.com/arran4/golang-ical"
+	"github.com/matteo-nyapa/tech-challenge-acai/internal/chat/model"
 	"github.com/openai/openai-go/v2"
 )
 
@@ -24,42 +25,49 @@ func New() *Assistant {
 
 func (a *Assistant) Title(ctx context.Context, conv *model.Conversation) (string, error) {
 	if len(conv.Messages) == 0 {
-		return "An empty conversation", nil
+		return "Untitled conversation", nil
 	}
 
 	slog.InfoContext(ctx, "Generating title for conversation", "conversation_id", conv.ID)
 
-	msgs := make([]openai.ChatCompletionMessageParamUnion, len(conv.Messages))
+	var firstUser string
+	for _, m := range conv.Messages {
+		if m.Role == model.RoleUser && strings.TrimSpace(m.Content) != "" {
+			firstUser = m.Content
+			break
+		}
+	}
+	if firstUser == "" {
+		firstUser = conv.Messages[0].Content
+	}
 
-	msgs[0] = openai.AssistantMessage("Generate a concise, descriptive title for the conversation based on the user message. The title should be a single line, no more than 80 characters, and should not include any special characters or emojis.")
-	for i, m := range conv.Messages {
-		msgs[i] = openai.UserMessage(m.Content)
+	msgs := []openai.ChatCompletionMessageParamUnion{
+		openai.SystemMessage(
+			"You are a titling assistant. Generate a concise, neutral conversation TITLE (max 80 characters) summarizing the user's question. Do NOT answer the question. No quotes, no emojis, no trailing punctuation. Return ONLY the title.",
+		),
+		openai.UserMessage(firstUser),
 	}
 
 	resp, err := a.cli.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
-		Model:    openai.ChatModelO1,
+		Model:    openai.ChatModelGPT4_1,
 		Messages: msgs,
 	})
-
 	if err != nil {
 		return "", err
 	}
-
 	if len(resp.Choices) == 0 || strings.TrimSpace(resp.Choices[0].Message.Content) == "" {
 		return "", errors.New("empty response from OpenAI for title generation")
 	}
 
-	title := resp.Choices[0].Message.Content
-	title = strings.ReplaceAll(title, "\n", " ")
-	title = strings.Trim(title, " \t\r\n-\"'")
-
-	if len(title) > 80 {
-		title = title[:80]
+	title := normalizeTitle(resp.Choices[0].Message.Content)
+	if title == "" {
+		title = normalizeTitle(firstUser)
+		if title == "" {
+			title = "Untitled conversation"
+		}
 	}
-
 	return title, nil
 }
-
 func (a *Assistant) Reply(ctx context.Context, conv *model.Conversation) (string, error) {
 	if len(conv.Messages) == 0 {
 		return "", errors.New("conversation has no messages")
@@ -203,4 +211,20 @@ func (a *Assistant) Reply(ctx context.Context, conv *model.Conversation) (string
 	}
 
 	return "", errors.New("too many tool calls, unable to generate reply")
+}
+
+func normalizeTitle(s string) string {
+	s = strings.TrimSpace(s)
+	s = strings.ReplaceAll(s, "\n", " ")
+	s = strings.Trim(s, `"'`)
+
+	re := regexp.MustCompile(`[^\p{L}\p{N}\s\-]`)
+	s = re.ReplaceAllString(s, "")
+
+	s = strings.TrimRight(s, ".!?… ")
+
+	if len(s) > 80 {
+		s = s[:80]
+	}
+	return strings.TrimSpace(s)
 }

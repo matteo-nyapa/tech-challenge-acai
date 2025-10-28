@@ -1,6 +1,6 @@
 package model
 
-import "github.com/acai-travel/tech-challenge/internal/pb"
+import "github.com/matteo-nyapa/tech-challenge-acai/internal/pb"
 
 type Role string
 

@@ -5,13 +5,13 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/acai-travel/tech-challenge/internal/chat"
-	"github.com/acai-travel/tech-challenge/internal/chat/assistant"
-	"github.com/acai-travel/tech-challenge/internal/chat/model"
-	"github.com/acai-travel/tech-challenge/internal/httpx"
-	"github.com/acai-travel/tech-challenge/internal/mongox"
-	"github.com/acai-travel/tech-challenge/internal/pb"
 	"github.com/gorilla/mux"
+	"github.com/matteo-nyapa/tech-challenge-acai/internal/chat"
+	"github.com/matteo-nyapa/tech-challenge-acai/internal/chat/assistant"
+	"github.com/matteo-nyapa/tech-challenge-acai/internal/chat/model"
+	"github.com/matteo-nyapa/tech-challenge-acai/internal/httpx"
+	"github.com/matteo-nyapa/tech-challenge-acai/internal/mongox"
+	"github.com/matteo-nyapa/tech-challenge-acai/internal/pb"
 	"github.com/twitchtv/twirp"
 )
 
