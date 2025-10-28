@@ -1,180 +1,252 @@
-# Acai Technical Challenge
+# 🌴 Acai Technical Challenge – AI Assistant (Go)
 
-This technical challenge is part of the interview process for a Software Engineer position at [Acai Travel](https://acaitravel.com). 
-If you weren't sent here by one of our engineers, you can [get started here](https://www.acaitravel.com/about/careers).
+This project is my solution to the **Acai Travel Technical Challenge** for the *Software Engineer* position.
 
-We know you're eager to get to the code, but please read the instructions carefully before you begin.
+The app is a personal assistant service similar to ChatGPT, allowing you to have conversations with an AI assistant and obtain useful information, such as the weather or holidays, through a **Twirp** API.
+During the challenge, **all 5 proposed tasks** were completed, with bonuses included.
 
-The challenge might seem tricky at first, but once you get into it, we hope you'll enjoy the process and have fun 
-working with AI and Go.
+---
 
-## Introduction
+## 🚀 Core Technologies
 
-In this challenge, you'll work on an existing application from this repository, written in [Go](https://go.dev). You can 
-make changes, add features, refactor existing code, etc. Think of it as if you've just joined a team and received a task 
-to improve an existing codebase.
+- **Go** (1.22+)
+- **MongoDB** (Docker)
+- **Twirp** (gRPC/JSON framework)
+- **OpenAI API**
+- **OpenTelemetry** (metrics and traces)
+- **WeatherAPI** (real-world weather data)
+- **Gorilla/Mux** (routing)
+- **Testify** and `httptest` for unit tests
 
-You will be given a few specific [tasks to complete](#Tasks), but feel free to do some housekeeping if you see something that 
-could be improved.
+---
 
-The application is a personal assistant service, which provides an API for conversations with an AI assistant. You could 
-say it's an API for an interface similar to ChatGPT: you have an endpoint to start a new conversation, an endpoint to 
-send a message to an existing conversation, a way to list conversations, and an endpoint to fetch a conversation by ID.
+## ⚙️ Setup and Run
 
-The assistant is built on top of [OpenAI's model](https://openai.com/), but it leverages 
-[additional tools](https://platform.openai.com/docs/guides/function-calling) and potentially some clever prompting to 
-provide a more useful experience.
+### 1. Clone the repository
 
-Currently, the assistant can:
-- Answer questions about the current date and time.
-- Provide weather information (though it seems broken).
-- Provide information about holidays in Barcelona.
-- Provide general AI assistance.
-
-## About the codebase
-
-We expect you to be able to navigate and figure out the codebase on your own, but here are some key takeaways to give 
-you a boost:
-
-- There is a `Makefile` with a few handy commands like `make up` and `make run`.
-- The entry point to the application is in `cmd/server/main.go`, but the main logic lives in `internal/chat/server.go`.
-- The application stores conversations in a [MongoDB](https://www.mongodb.com/) database. There's a docker compose file 
-  to start a local MongoDB instance.
-- The application uses [Twirp](https://twitchtv.github.io/twirp/docs/intro.html) and [protobuf](https://protobuf.dev/)
-  as a framework for the API. **You do NOT need to dig deep into Twirp and protobuf**. It's easy to use, provides JSON
-  via HTTP endpoints, and "automagically" wires HTTP handlers and server implementation.
-- The project uses code generation, but you should be able to complete the challenge without needing to run or 
-  understand it. In any case, do **not** make manual changes to the `internal/pb` package, maybe consider it a blackbox.
-
-## General guidelines
-
-1. **Do not fork this repository.** Instead, create a new repository in your own GitHub account and copy the contents of 
-   this repository into it. Forks are linked to the original repository, and we'd like to avoid candidates discovering 
-   each other's solutions. Keep your repository **public** so we can see your solution.
-2. **Make use of git history.** It's easier for us to review your code if you commit your changes in meaningful chunks 
-   with clear descriptions.
-3. **Use standard Go tools.** Use the tools shipped with the Go compiler, such as `go fmt`, `go test`, etc. Avoid 
-   unnecessary dependencies or tools. Keep it simple.
-4. **Use Go conventions.** Follow Go conventions for naming, formatting, and structuring your code. Check the 
-   [Effective Go](https://go.dev/doc/effective_go) and [Go Code Review Comments](https://go.dev/wiki/CodeReviewComments).
-5. **Leave comments** where it makes sense. It helps whoever reads the code after you.
-6. **You may use AI assistance/co-pilots**, but remember we are looking for a meaningful and maintainable codebase, not 
-   something slapped together quickly.
-
-## Setting things up
-
-You'll need:
-- [Go](https://go.dev/doc/install) (use whatever version you have, or install the latest).
-- [Docker](https://docs.docker.com/get-docker/) (to run the MongoDB container).
-- The usual developer tools: git, make, etc.
-
-Set up a repository:
-1. Create a new repository in your GitHub account. Clone this repository, then copy everything except the `.git` folder 
-   into your own repo.
-2. Commit the changes as **"Initial commit"** to set your starting point.
-
-Start the application:
-1. Set your OpenAI API key in the environment variable `OPENAI_API_KEY`.
-   ```bash
-   export OPENAI_API_KEY=your_openai_api_key
-   ```
-2. Use make to start MongoDB and the application. Make sure docker daemon is running.
-   ```bash
-   make up run
-   ```
-3. You should see `Starting the server...`, indicating the HTTP server is running at [localhost:8080](http://localhost:8080).
-4. Use `command+C` to stop the server when you're done.
-5. Use `make down` to stop the MongoDB container.
-
-## Usage
-
-> Before you interact with the application, make sure it's running, follow steps in the **Setting things up** section.
-
-The application provides a simple HTTP-based API, you can interact with it using any HTTP client (like Postman, curl, 
-etc.) or use the [CLI tool](cmd/cli/README.md) provided in this repository.
-
-### CLI tool
-
-You can find [CLI tool](cmd/cli/README.md) in `cmd/cli` to interact with the application.
-
-### HTTP API
-
-We have created a [postman collection](https://documenter.getpostman.com/view/40257649/2sB3BKFo8S) for you to explore 
-the API. You can use [postman](https://www.postman.com/) or any other HTTP client.
-
-## Testing
-
-The codebase includes tests for the server and the assistant. The tests require mongoDB to be running, so make sure
-to start it with `make up` before running the tests.
-
-Run the tests using:
 ```bash
-go test ./...
+git clone https://github.com/matteo-nyapa/acai-challenge.git
+cd acai-challenge
 ```
 
-## Tasks
+### 2. Required Environment Variables
 
-**You can complete as many tasks as you like**, you can skip tasks that do not appeal to you.
-The more tasks you complete, the better we can assess your skills.
+Create a `.env` file or export variables directly:
 
-We would like you to spend at least 1 hour on the challenge.
+```bash
+export OPENAI_API_KEY=your_openai_api_key
+export WEATHER_API_KEY=your_weatherapi_api_key
+```
 
-### Task 1: Fix conversation title
+> 💡 You can get a free API key at [WeatherAPI.com](https://www.weatherapi.com/).
 
-> We recommend starting with this one. This task is relatively easy and requires you to debug the application, allowing you to get familiar with the codebase, and understand how the application works.
+### 3. Start MongoDB and run the server
 
-If you start a conversation, you'll notice the title does not really reflect the topic. Instead of summarizing your 
-question, it tries to answer it.
+Make sure you have Docker running and run:
 
-Your task is to fix the title generation logic so it summarizes the question instead of answering it. The system should 
-generate a concise title that reflects the main topic of the conversation.
+```bash
+make up run
+```
 
-For example, if you ask *"What is the weather like in Barcelona?"*, the title should be something like *"Weather in 
-Barcelona"*.
+The server will start at:
 
-**Bonus:** Optimize performance for the `StartConversation` API to make it faster.
-
----
-
-### Task 2: Fix the weather
-
-The assistant is supposed to provide weather information, but currently it just says *"the weather is fine."* You need to connect it to a real weather API and return actual weather information (temperature, wind speed, conditions, etc.).
-
-You can use any public weather API, e.g. [WeatherAPI](https://www.weatherapi.com/). This particular API is free to use, 
-but you need to sign up and get an API key.
-
-**Bonus:** Enable the assistant to provide forecast information as well as current weather.
+👉 [http://localhost:8080/](http://localhost:8080/).
 
 ---
 
-### Task 3: Refactor tools
+## 💬 Main API
 
-The team is concerned that the way tools are currently defined in the codebase makes them difficult to maintain and extend. We're planning to add many more tools to give the assistant more capabilities, so we need a robust way to define and implement tools.
+### **POST /twirp/acai.chat.ChatService/StartConversation**
 
-Refactor `internal/assistant/assistant.go` to make working with tools easier. Feel free to split things into files, introduce new package(s), or reorganize code as you see fit.
+Start a new conversation with the AI ​​assistant.
+This endpoint creates a conversation in MongoDB, automatically generates a title, and returns the assistant's first response.
 
-**Bonus:** Create a new tool of your choice.
+#### 🧠 Request Example
+
+```bash
+curl -s -X POST 'http://localhost:8080/twirp/acai.chat.ChatService/StartConversation' \
+-H 'Content-Type: application/json' \
+-d '{"message":"What is the weather in Barcelona today?"}' | jq .
+```
+
+#### 📦 Response Example
+
+```json
+{
+"conversation_id": "68a6e63c288abccdf52b6355",
+"title": "Weather in Barcelona",
+"reply": "Currently in Barcelona: 20.4°C, Sunny, wind 10 km/h. Forecast available for the next 3 days."
+}
+```
 
 ---
 
-### Task 4: Create a test for StartConversation API
+## 🧠 Wizard Features
 
-The team wants a test for the `StartConversation` API to ensure it works as expected. Create an automated test in `internal/chat/server_test.go` to ensure the API:
+The wizard uses a modular system of **tools** that extend its capabilities beyond text, allowing it to access external data or perform specific functions.
 
-- Creates new conversations.
-- Populates the title.
-- Triggers the assistant's response.
-  
-**Bonus:** Add tests for assistant's `Title` method in `internal/assistant/assistant.go`.
+The currently active tools are listed below:
+
+| Tool | Description |
+|------|--------------|
+| 🗓️ `get_today_date` | Returns the current date and time in RFC3339 format |
+| ☀️ `get_weather` | Query the current weather or forecast using the WeatherAPI |
+| 🎉 `get_holidays` | Displays official holidays for Barcelona (remote ICS file) |
+| ⏰ `time_in` | Returns the current time in a specific time zone *(bonus tool)* |
+
+> These tools are dynamically registered using a **registry**, allowing new tools to be added without modifying the assistant's main code.
 
 ---
 
-### Task 5: Instrument web server
+## 🧪 Tests
 
-The team wants better visibility into the performance of the web server. Add some basic metrics to track the number of requests, response times, and error rates.
+The tests cover both the server and the assistant tools.
+They include **unit and integration** tests that ensure the correct operation of each component.
 
-Use [OpenTelemetry](https://opentelemetry.io/docs/languages/go/instrumentation/#metrics) to capture metrics for the number of requests and response times.
+### 🔍 Main Coverage
 
-Keep the exporter and provider configuration simple—the key part is how you capture and configure specific metrics.
+- **Tools:**
+- `weather`, `holidays`, `today`, `time_in`, `registry`
+- **API:**
+- `StartConversation` → creates a conversation, assigns a title, and generates a response.
+- **Assistant:**
+- `Title` → generates concise and relevant titles.
+- **Weather client:**
+- Use of a mock HTTP server (no external dependencies).
 
-**Bonus:** Add tracing to the web server to track request flow through the application.
+### ▶️ Run all tests
+
+Make sure you have MongoDB running (use `make up`) and then run:
+
+```bash
+go test ./... -v
+```
+
+#### 🧾 Sample output
+
+```bash
+=== RUN TestWeatherTool_Call_UsesMockWeatherAPI
+--- PASS: TestWeatherTool_Call_UsesMockWeatherAPI (0.01s)
+=== RUN TestServer_StartConversation_CreatesConversation
+--- PASS: TestServer_StartConversation_CreatesConversation (0.03s)
+PASS
+ok github.com/usuario/acai-challenge/internal/... 1.2s
+```
+
+---
+
+## 📊 Observability (Task 5)
+
+Added **metrics and tracing** using **OpenTelemetry** to gain visibility into server performance.
+
+### 📈 Collected Metrics
+
+| Metric | Type | Description |
+|----------|------|--------------|
+| `http.server.requests` | Counter | Total number of requests received |
+| `http.server.duration.seconds` | Histogram | Average request duration |
+| `http.server.errors` | Counter | Total number of errors logged |
+
+### 🧩 Tracing
+
+Each Twirp request generates a **span** called `twirp.request` with attributes that describe the request's execution flow:
+
+- `rpc.system`: `"twirp"`
+- `rpc.service`: `"ChatService"`
+- `rpc.method`: `"StartConversation"`
+- `http.route`: `"ChatService/StartConversation"`
+- `http.status_code`: `"200"`
+
+#### 🧾 Console output example (stdout exporter)
+
+```json
+{
+"Name": "twirp.request",
+"Attributes": [
+{"Key": "rpc.service", "Value": "ChatService"},
+{"Key": "rpc.method", "Value": "StartConversation"},
+{"Key": "http.status_code", "Value": "200"}
+],
+"StartTime": "2025-10-28T15:00:11Z",
+"EndTime": "2025-10-28T15:00:15Z"
+}
+```
+
+> 💡 **Note:**
+> Metrics and traces are exported in **JSON** format directly to standard output (`stdout`).
+> This allows you to **monitor response times, errors, and execution flow** without needing to configure an additional backend
+> (such as **Jaeger**, **Grafana**, or **Prometheus**).
+
+---
+
+## 📁 Relevant structure of the project
+
+```bash
+cmd/
+├── cli/ # herramienta CLI para interactuar con la API
+│ └── main.go
+└── server/ # punto de entrada principal del servidor
+└── main.go
+internal/
+├── chat/
+│ ├── assistant/ # integración con OpenAI
+│ │ ├── assistant.go # núcleo del asistente
+│ │ ├── assistant_test.go
+│ │ ├── calendar/ # manejo de calendarios ICS (festivos)
+│ │ └── tools/ # tools modulares (weather, today, holidays, time_in)
+│ ├── model/ # modelos y acceso a base de datos MongoDB
+│ │ ├── conversation.go
+│ │ ├── message.go
+│ │ ├── repository.go
+│ │ ├── role.go
+│ │ └── testing/ # utilidades para tests (fixtures, mocks)
+│ │ ├── fixture.go
+│ │ ├── mongo.go
+│ │ └── server_test.go
+│ └── server.go # implementación principal del servidor Twirp
+├── httpx/ # middlewares de logging y recuperación de errores
+│ ├── logger.go
+│ └── recovery.go
+├── mongox/ # conexión a MongoDB
+│ └── connect.go
+├── observability/ # métricas y tracing con OpenTelemetry
+│ ├── otel.go
+│ └── setup.go
+├── pb/ # código generado por Twirp/Protobuf (no modificar)
+│ ├── chat.pb.go
+│ └── chat.twirp.go
+└── weather/ # cliente de WeatherAPI (actual y forecast)
+├── weather.go
+└── weather_test.go
+rpc/
+└── chat.proto # definición del servicio Twirp/Protobuf
+docker-compose.yaml # configuración para MongoDB local
+go.mod # dependencias del proyecto
+go.sum
+Makefile # comandos make (up, run, test)
+README.md # documentación del proyecto
+```
+---
+
+## ✅ Completed Tasks
+
+| Task | Description | Status |
+|------|--------------|:------:|
+| 1 | Fix conversation title | ✅ |
+| 2 | Fix the weather (real API + forecast) | ✅ |
+| 3 | Refactor tools (registry + bonus tool) | ✅ |
+| 4 | Test StartConversation API + Title | ✅ |
+| 5 | Add OpenTelemetry metrics + tracing | ✅ |
+
+---
+
+## 🏁 Submission
+
+Public repository:
+👉 **https://github.com/matteo-nyapa/acai-challenge**
+
+Includes:
+- Complete code (`go.mod`, `Makefile`, `docker-compose.yml`, etc.)
+- Working tests (`go test ./...`)
+- Updated README (this file)
+- Metrics and traces visible in console (stdout)
