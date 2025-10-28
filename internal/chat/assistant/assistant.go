@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"os"
 	"regexp"
@@ -12,6 +13,7 @@ import (
 
 	ics "github.com/arran4/golang-ical"
 	"github.com/matteo-nyapa/tech-challenge-acai/internal/chat/model"
+	"github.com/matteo-nyapa/tech-challenge-acai/internal/weather"
 	"github.com/openai/openai-go/v2"
 )
 
@@ -95,12 +97,16 @@ func (a *Assistant) Reply(ctx context.Context, conv *model.Conversation) (string
 			Tools: []openai.ChatCompletionToolUnionParam{
 				openai.ChatCompletionFunctionTool(openai.FunctionDefinitionParam{
 					Name:        "get_weather",
-					Description: openai.String("Get weather at the given location"),
+					Description: openai.String("Get weather at the given location (and optional forecast)"),
 					Parameters: openai.FunctionParameters{
 						"type": "object",
 						"properties": map[string]any{
 							"location": map[string]string{
 								"type": "string",
+							},
+							"days": map[string]string{
+								"type":        "integer",
+								"description": "Optional: number of forecast days (1-10)",
 							},
 						},
 						"required": []string{"location"},
@@ -150,7 +156,36 @@ func (a *Assistant) Reply(ctx context.Context, conv *model.Conversation) (string
 
 				switch call.Function.Name {
 				case "get_weather":
-					msgs = append(msgs, openai.ToolMessage("weather is fine", call.ID))
+					var args struct {
+						Location string `json:"location"`
+						Days     int    `json:"days,omitempty"`
+					}
+					if err := json.Unmarshal([]byte(call.Function.Arguments), &args); err != nil || strings.TrimSpace(args.Location) == "" {
+						msgs = append(msgs, openai.ToolMessage("invalid arguments: provide {\"location\":\"<city>\", \"days\":<optional int>}", call.ID))
+						break
+					}
+
+					res, werr := weather.Fetch(ctx, args.Location, args.Days)
+					if werr != nil {
+						msgs = append(msgs, openai.ToolMessage("failed to fetch weather: "+werr.Error(), call.ID))
+						break
+					}
+
+					var b strings.Builder
+					fmt.Fprintf(&b, "Location: %s, %s\n", res.Place.Name, res.Place.Country)
+					fmt.Fprintf(&b, "Current: %.1f°C, %s, wind %.0f km/h (dir %.0f°)\n",
+						res.Current.TemperatureC, res.Current.Condition, res.Current.WindSpeedKmh, res.Current.WindDirDeg)
+
+					if len(res.Forecast) > 0 {
+						fmt.Fprintf(&b, "Forecast (%d days):\n", len(res.Forecast))
+						for _, d := range res.Forecast {
+							fmt.Fprintf(&b, "- %s: %s, min %.1f°C / max %.1f°C, wind max %.0f km/h\n",
+								d.Date.Format("2006-01-02"), d.Condition, d.MinTempC, d.MaxTempC, d.WindMaxKmh)
+						}
+					}
+
+					msgs = append(msgs, openai.ToolMessage(b.String(), call.ID))
+
 				case "get_today_date":
 					msgs = append(msgs, openai.ToolMessage(time.Now().Format(time.RFC3339), call.ID))
 				case "get_holidays":
