@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -11,19 +12,34 @@ import (
 	"github.com/matteo-nyapa/tech-challenge-acai/internal/chat/model"
 	"github.com/matteo-nyapa/tech-challenge-acai/internal/httpx"
 	"github.com/matteo-nyapa/tech-challenge-acai/internal/mongox"
+	"github.com/matteo-nyapa/tech-challenge-acai/internal/observability"
 	"github.com/matteo-nyapa/tech-challenge-acai/internal/pb"
 	"github.com/twitchtv/twirp"
 )
 
 func main() {
-	mongo := mongox.MustConnect()
 
+	ctx := context.Background()
+	shutdown, err := observability.SetupOTel(ctx)
+	if err != nil {
+		panic(fmt.Errorf("failed to setup OpenTelemetry: %w", err))
+	}
+	defer func() {
+		if err := shutdown(ctx); err != nil {
+			slog.Error("OpenTelemetry shutdown error", "err", err)
+		}
+	}()
+
+	hooks, _, err := observability.NewServerMetrics()
+	if err != nil {
+		panic(fmt.Errorf("failed to init server metrics: %w", err))
+	}
+
+	mongo := mongox.MustConnect()
 	repo := model.New(mongo)
 	assist := assistant.New()
-
 	server := chat.NewServer(repo, assist)
 
-	// Configure handler
 	handler := mux.NewRouter()
 	handler.Use(
 		httpx.Logger(),
@@ -34,10 +50,14 @@ func main() {
 		_, _ = fmt.Fprint(w, "Hi, my name is Clippy!")
 	})
 
-	handler.PathPrefix("/twirp/").Handler(pb.NewChatServiceServer(server, twirp.WithServerJSONSkipDefaults(true)))
+	twirpSrv := pb.NewChatServiceServer(
+		server,
+		twirp.WithServerJSONSkipDefaults(true),
+		twirp.WithServerHooks(hooks),
+	)
+	handler.PathPrefix("/twirp/").Handler(twirpSrv)
 
-	// Start the server
-	slog.Info("Starting the server...")
+	slog.Info("Starting the server...", "addr", ":8080")
 	if err := http.ListenAndServe(":8080", handler); err != nil {
 		panic(err)
 	}
